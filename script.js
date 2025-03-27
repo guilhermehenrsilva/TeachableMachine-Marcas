@@ -1,52 +1,84 @@
-    // More API functions here:
-    // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
+const URL = "./my_model/";
 
-    // the link to your model provided by Teachable Machine export panel
-    const URL = "./my_model/";
+let model, webcam, labelContainer, maxPredictions;
 
-    let model, webcam, labelContainer, maxPredictions;
+// Carrega o modelo
+async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-    // Load the image model and setup the webcam
-    async function init() {
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
 
-        // load the model and metadata
-        // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-        // or files from your local hard drive
-        // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+    labelContainer = document.getElementById("label-container");
+    labelContainer.innerHTML = ""; // Limpa qualquer previsão anterior
 
-        // Convenience function to setup a webcam
-        const flip = true; // whether to flip the webcam
-        webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
-        await webcam.setup(); // request access to the webcam
-        await webcam.play();
-        window.requestAnimationFrame(loop);
-
-        // append elements to the DOM
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
-        labelContainer = document.getElementById("label-container");
-        for (let i = 0; i < maxPredictions; i++) { // and class labels
-            labelContainer.appendChild(document.createElement("div"));
-        }
+    for (let i = 0; i < maxPredictions; i++) {
+        labelContainer.appendChild(document.createElement("div"));
     }
 
-    async function loop() {
-        webcam.update(); // update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
+    // Configuração da webcam
+    const flip = true;
+    webcam = new tmImage.Webcam(200, 200, flip);
+    await webcam.setup();
+    await webcam.play();
+    window.requestAnimationFrame(loop);
 
-    // run the webcam image through the image model
-    async function predict() {
-        // predict can take in an image, video or canvas html element
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
-        }
-    }
+    document.getElementById("webcam-container").appendChild(webcam.canvas);
+}
 
+// Loop para capturar frames da webcam
+async function loop() {
+    webcam.update();
+    await predict(webcam.canvas);
+    window.requestAnimationFrame(loop);
+}
+
+// Predição usando imagem ou webcam
+async function predict(source) {
+    const prediction = await model.predict(source);
+    labelContainer.innerHTML = ""; // Limpa previsões anteriores
+
+    for (let i = 0; i < maxPredictions; i++) {
+        const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
+        const div = document.createElement("div");
+        div.innerHTML = classPrediction;
+        labelContainer.appendChild(div);
+    }
+}
+
+// Evento para abrir seletor de arquivos
+document.getElementById("uploadImage").addEventListener("click", () => {
+    document.getElementById("imageUpload").click();
+});
+
+// Manipula a imagem carregada
+document.getElementById("imageUpload").addEventListener("change", handleImageUpload);
+
+async function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+        const img = new Image();
+        img.src = e.target.result;
+        img.onload = async function () {
+            // Redimensiona a imagem para corresponder ao tamanho do modelo
+            const canvas = document.createElement("canvas");
+            canvas.width = 200;
+            canvas.height = 200;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            // Exibe a imagem carregada na página
+            const imageContainer = document.getElementById("image-container");
+            imageContainer.innerHTML = "";
+            imageContainer.appendChild(img);
+
+            // Realiza a predição
+            await predict(canvas);
+        };
+    };
+    reader.readAsDataURL(file);
+}
