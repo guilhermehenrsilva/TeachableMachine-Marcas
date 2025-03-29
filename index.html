@@ -14,14 +14,19 @@
     </header>
     
     <main class="container text-center mt-4">
-        <h2 class="mb-3">Teachable Machine Image Model</h2>
-        <button class="btn btn-custom" onclick="init()">Iniciar</button>
-        <div id="webcam-container" class="mt-4"></div>
-        <div id="label-container" class="mt-3"></div>
-        <h3>Ou...</h3>
+        <div class="">  
+            <h2 class="mb-3">Teachable Machine Image Model</h2>
+            <button class="btn btn-custom" onclick="init()">Iniciar</button>
+            <div id="webcam-container" class="mt-4"></div>
+            <div id="label-container" class="mt-3"></div>
+        </div>
+        <div> <h3>Ou...</h3> </div>
+
+    <div class="2">
         <input type="file" id="imageUpload" accept="image/*" style="display: none;">
         <button class="btn btn-custom" id="uploadImage">Upload de imagem</button>
         <div id="image-container" class="mt-3"></div>
+    </div>
     </main>
     
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>

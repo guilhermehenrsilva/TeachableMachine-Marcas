@@ -1,27 +1,43 @@
-body {
+/* Define altura total para o HTML e BODY e configura o layout */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
     background-color: #f8f9fa;
 }
 
+/* Define que o conteúdo principal ocupa o espaço disponível */
+main {
+    flex: 1;
+}
+
+/* Estilo do cabeçalho */
 .hero {
     background: linear-gradient(135deg, #0a1931, #162447);
     color: white;
     padding: 60px 20px;
+    text-align: center;
 }
 
+/* Estilo dos botões */
 .btn-custom {
     background-color: #0a1931;
     color: white;
     border: none;
+    padding: 10px 20px;
+    cursor: pointer;
 }
 
 .btn-custom:hover {
     background-color: #0d1f4d;
 }
 
+/* Estilo do rodapé */
 footer {
     background-color: #0a1931;
     color: white;
     text-align: center;
     padding: 15px;
-    margin-top: 30px;
+    margin-top: auto;
 }
