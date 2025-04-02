@@ -1,21 +1,30 @@
 const URL = "./my_model/";
 
+
+// Redirecionamento automático para a Home
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.location.pathname === "/") {
+        window.location.href = "home.html";
+    }
+});
+
 let model, webcam, labelContainer, maxPredictions;
 
-// Carregar o modelo ao iniciar a página
+// Alternar entre seções (câmera/upload)
+function showSection(sectionId) {
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active-section');
+    });
+    document.getElementById(sectionId).classList.add('active-section');
+}
+
+// Carregar o modelo
 async function loadModel() {
     const modelURL = URL + "model.json";
     const metadataURL = URL + "metadata.json";
 
     model = await tmImage.load(modelURL, metadataURL);
     maxPredictions = model.getTotalClasses();
-
-    labelContainer = document.getElementById("label-container");
-    labelContainer.innerHTML = ""; // Limpa previsões anteriores
-
-    for (let i = 0; i < maxPredictions; i++) {
-        labelContainer.appendChild(document.createElement("div"));
-    }
 }
 
 // Iniciar a webcam
@@ -30,7 +39,16 @@ async function init() {
     await webcam.play();
     window.requestAnimationFrame(loop);
 
+    document.getElementById("webcam-container").innerHTML = "";
     document.getElementById("webcam-container").appendChild(webcam.canvas);
+
+    // Criar ou redefinir container para os resultados da câmera
+    labelContainer = document.getElementById("label-container");
+    labelContainer.innerHTML = ""; 
+
+    for (let i = 0; i < maxPredictions; i++) {
+        labelContainer.appendChild(document.createElement("div"));
+    }
 }
 
 // Loop para capturar frames da webcam
@@ -48,9 +66,16 @@ async function predict(source, isImageUpload = false) {
     }
 
     const prediction = await model.predict(source);
-    
+
     if (isImageUpload) {
-        document.getElementById("label-container").innerHTML = ""; // Limpa previsões anteriores
+        // Criar ou redefinir container para os resultados do upload
+        let uploadLabelContainer = document.getElementById("upload-label-container");
+        if (!uploadLabelContainer) {
+            uploadLabelContainer = document.createElement("div");
+            uploadLabelContainer.id = "upload-label-container";
+            document.getElementById("uploadSection").appendChild(uploadLabelContainer);
+        }
+        uploadLabelContainer.innerHTML = "";
 
         // Encontra a predição com maior probabilidade
         let bestPrediction = prediction.reduce((max, p) => (p.probability > max.probability ? p : max), prediction[0]);
@@ -58,7 +83,7 @@ async function predict(source, isImageUpload = false) {
         // Exibe apenas a classe com maior certeza
         const resultDiv = document.createElement("h4");
         resultDiv.innerHTML = `Classe: <strong>${bestPrediction.className}</strong>`;
-        document.getElementById("label-container").appendChild(resultDiv);
+        uploadLabelContainer.appendChild(resultDiv);
     } else {
         // Mantém o comportamento normal para a webcam
         for (let i = 0; i < maxPredictions; i++) {
@@ -68,19 +93,20 @@ async function predict(source, isImageUpload = false) {
     }
 }
 
+// Evento para upload de imagem
 document.getElementById("uploadImage").addEventListener("click", () => {
     document.getElementById("imageUpload").click();
 });
 
-// Manipula a imagem carregada
 document.getElementById("imageUpload").addEventListener("change", handleImageUpload);
 
+// Manipula a imagem carregada
 async function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     if (!model) {
-        await loadModel(); // Garante que o modelo seja carregado antes de processar a imagem
+        await loadModel();
     }
 
     const reader = new FileReader();
@@ -88,19 +114,13 @@ async function handleImageUpload(event) {
         const img = new Image();
         img.src = e.target.result;
         img.onload = async function () {
-            // Redimensiona a imagem para corresponder ao tamanho do modelo
             const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
+            canvas.width = 200;
+            canvas.height = 200;
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            const maxSize = 200; // Mantém a imagem em 200x200 pixels
-            canvas.width = maxSize;
-            canvas.height = maxSize;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            // Exibe a imagem carregada na página
-            const imageContainer = document.getElementById("image-container");
-            imageContainer.innerHTML = "";
-            imageContainer.appendChild(canvas); // Agora exibe a versão redimensionada
+            document.getElementById("image-container").innerHTML = "";
+            document.getElementById("image-container").appendChild(canvas);
 
             await predict(canvas, true);
         };
@@ -108,4 +128,5 @@ async function handleImageUpload(event) {
     reader.readAsDataURL(file);
 }
 
+// Carregar modelo ao iniciar
 loadModel();

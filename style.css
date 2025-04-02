@@ -1,43 +1,93 @@
-/* Define altura total para o HTML e BODY e configura o layout */
+/* Reset e configuração geral */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Garante que o body e html ocupem toda a altura */
 html, body {
     height: 100%;
-    margin: 0;
     display: flex;
     flex-direction: column;
+}
+
+/* Faz o main ocupar todo o espaço disponível */
+main {
+    flex: 1; /* Isso empurra o footer para o final */
+}
+
+/* Ajusta o footer para sempre ficar embaixo */
+footer {
+    background: linear-gradient(135deg, #0a1931, #1f4068);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.9rem;
+    font-weight: 300;
+    margin-top: auto; /* Isso garante que ele fique no final */
+}
+
+
+body {
     background-color: #f8f9fa;
 }
 
-/* Define que o conteúdo principal ocupa o espaço disponível */
-main {
-    flex: 1;
+/* NAVBAR */
+.navbar {
+    background: #0a1931;
 }
 
-/* Estilo do cabeçalho */
+.nav-link {
+    color: white !important;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.nav-link:hover {
+    color: #ff4d5a !important;
+}
+
+/* HERO */
 .hero {
-    background: linear-gradient(135deg, #0a1931, #162447);
+    background: linear-gradient(135deg, #0a1931, #1f4068);
     color: white;
-    padding: 60px 20px;
     text-align: center;
+    padding: 80px 20px;
 }
 
-/* Estilo dos botões */
+/* BOTÕES */
 .btn-custom {
-    background-color: #0a1931;
+    background-color: #ff4d5a;
     color: white;
-    border: none;
-    padding: 10px 20px;
-    cursor: pointer;
+    border-radius: 25px;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    transition: 0.3s;
 }
 
 .btn-custom:hover {
-    background-color: #0d1f4d;
+    background-color: #e43e4e;
+    transform: scale(1.05);
 }
 
-/* Estilo do rodapé */
+/* SEÇÕES OCULTAS */
+.section {
+    display: none;
+    text-align: center;
+    padding: 40px 0;
+}
+
+.active-section {
+    display: block;
+}
+
+/* FOOTER */
 footer {
-    background-color: #0a1931;
+    background: #0a1931;
     color: white;
     text-align: center;
-    padding: 15px;
-    margin-top: auto;
+    padding: 20px;
+    margin-top: 40px;
 }
